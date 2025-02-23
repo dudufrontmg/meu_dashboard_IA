@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import clsx from 'clsx';
+import { formatHours } from '../utils/format';
 
 interface MetricsDisplayProps {
   metrics: {
@@ -19,7 +20,7 @@ export const MetricsDisplay: React.FC<MetricsDisplayProps> = ({ metrics }) => {
         <Clock className="w-5 h-5 text-gray-600" />
         <h3 className="text-sm font-medium text-gray-600">{title}</h3>
       </div>
-      <p className="text-2xl font-bold mt-2">{value.toFixed(2)}h</p>
+      <p className="text-2xl font-bold mt-2">{formatHours(value)}</p>
     </div>
   );
 

@@ -10,39 +10,97 @@ import {
   Line,
   ComposedChart,
   ResponsiveContainer,
+  LabelList
 } from 'recharts';
+import { formatHours } from '../utils/format';
+import { ActivityCategory } from '../types';
 
 interface ChartsProps {
   atividadeData: any[];
   globalData: any[];
 }
 
+const ACTIVITY_CATEGORIES: ActivityCategory[] = [
+  'Visita Técnica',
+  'Parametrização',
+  'PTAF',
+  'TAF',
+  'TAC',
+  'Técnico Campo'
+];
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload || !payload.length) return null;
+
+  return (
+    <div className="bg-white p-3 border rounded shadow">
+      <p className="font-semibold">{label}</p>
+      {payload.map((entry: any, index: number) => (
+        <p key={index} style={{ color: entry.color }}>
+          {entry.name}: {formatHours(entry.value)}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+const CustomLabel = (props: any) => {
+  const { x, y, value } = props;
+  return (
+    <text
+      x={x + props.width / 2}
+      y={y - 6}
+      textAnchor="middle"
+      fill="#666666"
+      fontSize={10}
+    >
+      {formatHours(value)}
+    </text>
+  );
+};
+
 export const Charts: React.FC<ChartsProps> = ({ atividadeData, globalData }) => {
   return (
     <div className="space-y-6">
       <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-4">Horas por Atividade</h3>
+        <h3 className="text-lg font-semibold mb-4">Controle de Horas</h3>
         <ResponsiveContainer width="100%" height={400}>
           <ComposedChart
             data={atividadeData}
-            layout="vertical"
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
-            <YAxis dataKey="name" type="category" width={150} />
-            <Tooltip />
+            <XAxis dataKey="name" />
+            <YAxis 
+              yAxisId="left"
+              label={{ value: 'Horas', angle: -90, position: 'insideLeft' }}
+              tickFormatter={(value) => formatHours(value)}
+            />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              label={{ value: 'Variação (%)', angle: 90, position: 'insideRight' }}
+            />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar dataKey="horasVendidas" fill="#22c55e" name="Horas Vendidas" />
-            <Bar dataKey="horasPlanejadas" fill="#f97316" name="Horas Planejadas" />
-            <Bar dataKey="horasConsumidas" fill="#3b82f6" name="Horas Consumidas" />
-            <Bar dataKey="horasImprodutivas" fill="#ef4444" name="Horas Improdutivas" />
-            <Bar dataKey="saldoHoras" fill="#6b7280" name="Saldo" />
+            <Bar yAxisId="left" dataKey="Vendido" fill="#22c55e" name="Vendido">
+              <LabelList content={<CustomLabel />} />
+            </Bar>
+            <Bar yAxisId="left" dataKey="Planejado" fill="#f97316" name="Planejado">
+              <LabelList content={<CustomLabel />} />
+            </Bar>
+            <Bar yAxisId="left" dataKey="Consumido" fill="#3b82f6" name="Consumido">
+              <LabelList content={<CustomLabel />} />
+            </Bar>
+            <Bar yAxisId="left" dataKey="Improdutivo" fill="#ef4444" name="Improdutivo">
+              <LabelList content={<CustomLabel />} />
+            </Bar>
             <Line
+              yAxisId="right"
               type="monotone"
-              dataKey="variacao"
+              dataKey="Variação PlanXCons"
               stroke="#8b5cf6"
-              name="Variação (%)"
+              name="Variação PlanXCons"
             />
           </ComposedChart>
         </ResponsiveContainer>
@@ -53,17 +111,22 @@ export const Charts: React.FC<ChartsProps> = ({ atividadeData, globalData }) => 
         <ResponsiveContainer width="100%" height={400}>
           <BarChart
             data={globalData}
-            layout="vertical"
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
-            <YAxis type="category" width={150} />
-            <Tooltip />
+            <XAxis dataKey="name" />
+            <YAxis tickFormatter={(value) => formatHours(value)} />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar dataKey="horasVendidas" fill="#22c55e" name="Horas Vendidas" />
-            <Bar dataKey="horasPlanejadas" fill="#f97316" name="Horas Planejadas" />
-            <Bar dataKey="horasConsumidas" fill="#3b82f6" name="Horas Consumidas" />
+            <Bar dataKey="horasVendidas" fill="#22c55e" name="Horas Vendidas">
+              <LabelList content={<CustomLabel />} />
+            </Bar>
+            <Bar dataKey="horasPlanejadas" fill="#f97316" name="Horas Planejadas">
+              <LabelList content={<CustomLabel />} />
+            </Bar>
+            <Bar dataKey="horasConsumidas" fill="#3b82f6" name="Horas Consumidas">
+              <LabelList content={<CustomLabel />} />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
